@@ -38,15 +38,15 @@ class Song(msgspec.Struct):
     title: str
     artist: str
     mp3: str  # deprecated
-    bpm: int
+    bpm: float
     notes: list[Note]
     audio: str | None = None
     version: str = "1.0.0"
-    gap: int | None = None
+    gap: float | None = None
     cover: str | None = None
     background: str | None = None
     video: str | None = None
-    videogap: int | None = None
+    videogap: float | None = None
     vocals: str | None = None
     instrumental: str | None = None
     genre: str | None = None
