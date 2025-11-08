@@ -1,0 +1,6 @@
+[project]
+name = "ultrastar-helper"
+version = "0.1.0"
+description = "Song File & Metadata helper"
+readme = "README.md"
+requires-python = ">=3.13"
