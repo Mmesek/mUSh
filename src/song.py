@@ -1,5 +1,6 @@
 import msgspec
 from models import Note, Song as SongSchema
+import separator
 
 
 class Song(SongSchema):
@@ -41,3 +42,15 @@ class Song(SongSchema):
 
         text += "E"
         return text
+
+    def separate_vocals(self, file_path: str = None):
+        """Using demucs, separates `vocals` and `instrumental` audio from `audio` or `mp3`"""
+        if self.vocals and self.instrumental:
+            return
+        if file_path:
+            audio = file_path + "/" + self.audio
+        else:
+            audio = self.audio
+        output_dir = separator.separate(audio)
+        self.vocals = separator.rename_stem(output_dir, "vocals.mp3")
+        self.instrumental = separator.rename_stem(output_dir, "no_vocals.mp3")
