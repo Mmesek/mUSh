@@ -3,3 +3,6 @@ python-ffmpeg
 nvidia-cublas-cu12
 nvidia-cudnn-cu12==9.*
 demucs
+whisperx
+torch==2.8.0+cu126
+torchaudio==2.8.0+cu126
