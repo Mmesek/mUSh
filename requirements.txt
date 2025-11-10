@@ -6,3 +6,5 @@ demucs
 whisperx
 torch==2.8.0+cu126
 torchaudio==2.8.0+cu126
+crepe
+tensorflow[and-cuda]
