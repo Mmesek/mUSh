@@ -30,19 +30,19 @@ class Note(msgspec.Struct):
 
     def __str__(self):
         if self.length:
-            return f"{self.note_type.value} {self.start_beat} {self.length} {self.pitch} {self.text}"
-        return f"{self.note_type.value} {self.start_beat}"
+            return f"{self.note_type.value} {self.start_beat:.0f} {self.length:.0f} {self.pitch:.0f} {self.text}"
+        return f"{self.note_type.value} {self.start_beat:.0f}"
 
 
 class Song(msgspec.Struct):
-    title: str
-    artist: str
-    mp3: str  # deprecated
-    bpm: float
-    notes: list[Note]
+    mp3: str = None  # deprecated
+    title: str = None
+    artist: str = None
+    notes: list[Note] = None
+    bpm: float = None
     audio: str | None = None
     version: str = "1.0.0"
-    gap: float | None = None
+    gap: float | None = 0
     cover: str | None = None
     background: str | None = None
     video: str | None = None
@@ -52,7 +52,7 @@ class Song(msgspec.Struct):
     genre: str | None = None
     tags: str | None = None
     edition: str | None = None
-    creator: str | None = None
+    creator: str | None = "mUSh"
     language: str | None = None
     year: int | None = None
     start: float | None = None
@@ -71,3 +71,7 @@ class Song(msgspec.Struct):
             self.mp3 = self.audio
         else:
             self.audio = self.mp3
+
+        if not self.title and not self.artist:
+            a, t = self.audio.split(".")[0].split(" - ")
+            self.artist, self.title = a.strip(), t.strip()
