@@ -225,6 +225,7 @@ class Song(FileOperations):
             .merge_chars()
             .merge_spaces()
             .running_bag()
+            .normalize_duration()
             # .insert_breaks()
         )
         notes = notes.result.to_numpy()

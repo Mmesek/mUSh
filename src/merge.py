@@ -299,6 +299,16 @@ class NoteCollection(msgspec.Struct):
     def print(self, debug: bool = False):
         print_notes(self.result.to_numpy(), debug)
 
+    def normalize_duration(self):
+        self.result["next_start"] = self.result["start"].shift(-1)
+        self.result["duration"] = self.result.apply(
+            lambda x: x["next_start"] - x["start"]
+            if x["start"] + x["duration"] > x["next_start"]
+            else x["duration"],
+            axis=1,
+        )
+        return self
+
     def running_bag(self):
         punc_breaks = {"?", "!", ":", ".", '"'}
         sentence = ""
