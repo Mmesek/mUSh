@@ -74,7 +74,10 @@ class FileOperations(SongSchema):
             text = self.dump()
         logger.debug("Writing song `%s` data to %s", self.title, path)
         with open(
-            path + "/" + self.title + ".txt", "w", newline="", encoding="utf-8"
+            path + "/" + self.artist + " - " + self.title + ".txt",
+            "w",
+            newline="",
+            encoding="utf-8",
         ) as file:
             file.writelines(text)
 
