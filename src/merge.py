@@ -299,6 +299,46 @@ class NoteCollection(msgspec.Struct):
     def print(self, debug: bool = False):
         print_notes(self.result.to_numpy(), debug)
 
+    def running_bag(self):
+        punc_breaks = {"?", "!", ":", ".", '"'}
+        sentence = ""
+        running = []
+
+        for x, row in self.result.iterrows():
+            _add = False
+            char: str = row["char"]
+            if char.isupper():
+                running.append(sentence)
+                sentence = ""
+                _add = True
+            sentence += char
+            if char[-1] in punc_breaks:
+                running.append(sentence)
+                sentence = ""
+                _add = True
+            if not _add:
+                running.append(sentence)
+        self.result["running"] = running
+        self.result["previous_running"] = self.result["running"].shift(1)
+        self.result["finished_sentence"] = self.result.apply(
+            lambda x: x["running"] == x["previous_running"], axis=1
+        )
+        rows = []
+        for x, row in self.result.iterrows():
+            if row["finished_sentence"]:
+                br = {
+                    "start": row["start"],
+                    "duration": 100,
+                    "pitch": np.nan,
+                    "char": "--",
+                }
+                rows.append(pd.Series(br))
+            rows.append(row[["start", "duration", "pitch", "char"]])
+
+        new = pd.DataFrame(rows).reset_index(drop=True)
+        self.result = new
+        return self
+
     def insert_breaks(self):
         """Inserts break note (char = '-') if gap > threshold between consecutive notes"""
         threshold = 0.5
