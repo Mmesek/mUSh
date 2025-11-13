@@ -113,26 +113,24 @@ class FileOperations(SongSchema):
             return str(self._cache) + "/" + file
         return file
 
-    def move(self, destination: str):
+    def _move(self, src: str, dst: str, file: str):
         import shutil
 
+        destination = dst + "/" + file
+        logger.debug("Moving %s to %s", src, destination)
+        shutil.move(src, destination)
+
+    def move(self, destination: str):
         destination += "/" + self.artist + " - " + self.title
         logger.debug("Creating directory %s", destination)
         os.makedirs(destination, exist_ok=True)
 
-        audio_destination = destination + "/" + self.audio
-        logger.debug("Moving %s to %s", self.audio, audio_destination)
-        shutil.move(self.get_path(self.audio), audio_destination)
+        self._move(self.audio, destination, self.audio)
+        if self.audio != self.video and self.video:
+            self._move(self.video, destination, self.video)
 
-        vocals = self.get_cache(self.vocals)
-        vocal_destination = destination + "/" + self.vocals
-        logger.debug("Moving %s to %s", vocals, vocal_destination)
-        shutil.move(vocals, vocal_destination)
-
-        instrumentals = self.get_cache(self.instrumental)
-        instrumentals_destination = destination + "/" + self.instrumental
-        logger.debug("Moving %s to %s", instrumentals, instrumentals_destination)
-        shutil.move(instrumentals, instrumentals_destination)
+        self._move(self.get_cache(self.vocals), destination, self.vocals)
+        self._move(self.get_cache(self.instrumental), destination, self.instrumental)
         return destination
 
 
