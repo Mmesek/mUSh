@@ -416,6 +416,39 @@ class NoteCollection(msgspec.Struct):
         if self.result is None or len(self.result) == 0:
             return self
 
+        self.result["previous_pitch"] = self.result["pitch"].shift(1)
+        self.result["previous_char"] = self.result["char"].shift(1)
+        self.result["can_extend"] = self.result.apply(
+            lambda x: (x["previous_char"] and not x["previous_char"].endswith(" "))
+            and x["char"] != "--"
+            and round(x["pitch"] if not pd.isna(x["pitch"]) else 0)
+            == round(x["previous_pitch"] if not pd.isna(x["previous_pitch"]) else 0),
+            axis=1,
+        )
+        merged = []
+        for _, row in self.result.iterrows():
+            if not merged or not row["can_extend"]:
+                merged.append(row.to_dict())
+                continue
+            prev = merged[-1]
+            prev_char = str(prev["char"])
+            print(prev_char, "+", row["char"])
+            prev["char"] = prev_char + str(row["char"])
+
+            # new duration: max end - prev start
+            prev_end = prev["start"] + prev["duration"]
+            row_end = row["start"] + row["duration"]
+            new_end = max(prev_end, row_end)
+            prev["duration"] = new_end - prev["start"]
+
+            merged[-1] = prev
+
+        self.result = pd.DataFrame(merged)[
+            ["start", "duration", "pitch", "char"]
+        ].reset_index(drop=True)
+        return self
+
+    def merge_chars_old(self):
         df = self.result.copy().reset_index(drop=True)
 
         merged = []
