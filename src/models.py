@@ -72,6 +72,9 @@ class Song(msgspec.Struct):
         else:
             self.audio = self.mp3
 
+        if any(self.audio.endswith(x) for x in {"mp4", "avi", "webm"}):
+            self.video = self.audio
+
         if not self.title and not self.artist:
             a, t = self.audio.split(".")[0].split(" - ")
             self.artist, self.title = a.strip(), t.strip()
