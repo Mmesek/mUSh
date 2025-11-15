@@ -231,25 +231,22 @@ class Song(FileOperations):
         logger.info("Building notes from transcription and pitch")
         notes = NoteCollection(self._transcription, self._pitch_result)
         if not self.gap:
-            self.gap = notes.result["start"][1]
-            logger.debug("Setting notes gap to %s", self.gap)
-            notes.result["start"] -= self.gap
-            self.gap = int(self.gap * 1000)
+            gap = notes.result["start"][1]
+            logger.debug("Setting notes gap to %s", gap)
+            notes.result["start"] -= gap
+            self.gap = int(gap * 1000)
             logger.debug("Setting gap to %s", self.gap)
         else:
             logger.debug("Setting notes gap to %s", self.gap / 1000)
             notes.result["start"] -= self.gap / 1000
 
         (
-            notes
-            # .set_gap()
-            .apply_bpm(self._real_bpm)
+            notes.apply_bpm(self._real_bpm)
             .merge_punctuation()
-            .merge_chars()
             .merge_spaces()
             .running_bag()
+            .merge_chars()
             .normalize_duration()
-            # .insert_breaks()
         )
         notes = notes.result.to_numpy()
         logger.info("Normalizing `NoteCollection` into list of `Note`s")
