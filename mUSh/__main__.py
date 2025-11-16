@@ -1,5 +1,5 @@
 import argparse
-
+from pathlib import Path
 from mUSh.cli import logger
 from mUSh.song import Song
 
@@ -20,8 +20,9 @@ parser.add_argument(
 if __name__ == "__main__":
     args = parser.parse_args()
     logger.info("New instance started")
-    s = Song(args.filepath)
-    logger.info("Song %s - %s initiated", s.title, s.artist)
+    path = Path(args.filepath)
+    s = Song(path.name, _path=path.absolute().resolve().parent)
+    logger.info("Song `%s` by `%s` initiated", s.title, s.artist)
     s.build_notes()
     logger.info("Notes built")
     destination = s.move(args.library)

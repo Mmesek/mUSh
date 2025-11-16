@@ -7,7 +7,7 @@ Following models has been created based on format specified at https://usdx.eu/f
 """
 
 from enum import Enum
-
+from pathlib import Path
 import msgspec
 
 
@@ -77,5 +77,6 @@ class Song(msgspec.Struct):
             self.video = self.audio
 
         if not self.title and not self.artist:
-            a, t = self.audio.split(".")[0].split(" - ")
+            audio = Path(self.audio).name
+            a, t = audio.split(".")[0].split(" - ")
             self.artist, self.title = a.strip(), t.strip()

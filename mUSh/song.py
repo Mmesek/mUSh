@@ -122,9 +122,9 @@ class FileOperations(SongSchema):
         logger.debug("Creating directory %s", destination)
         os.makedirs(destination, exist_ok=True)
 
-        self._move(self.audio, destination, self.audio)
+        self._move(self.get_path(self.audio), destination, self.audio)
         if self.audio != self.video and self.video:
-            self._move(self.video, destination, self.video)
+            self._move(self.get_path(self.video), destination, self.video)
 
         self._move(self.get_cache(self.vocals), destination, self.vocals)
         self._move(self.get_cache(self.instrumental), destination, self.instrumental)
@@ -139,7 +139,8 @@ class Song(FileOperations):
 
     def __post_init__(self):
         super().__post_init__()
-        self._path = str(Path(self.audio).parent)
+        if not self._path:
+            self._path = str(Path(self.audio).parent)
         self._cache = (
             Path(OUTPUT_DIR)
             / HTDEMUCS_MODEL
