@@ -50,4 +50,4 @@ def transcribe(
     for segment in result_aligned["segments"]:
         for char in segment["chars" if character_level else "words"]:
             chars.append(char)
-    return chars
+    return chars, detected_language

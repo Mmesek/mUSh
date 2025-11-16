@@ -174,7 +174,12 @@ class Song(FileOperations):
             return
 
         logger.info("Transcribing vocals from %s", self.vocals)
-        self._transcription = transcriber.transcribe(self.get_cache(self.vocals))
+        self._transcription, detected_language = transcriber.transcribe(
+            self.get_cache(self.vocals), language=self.language
+        )
+        if not self.language:
+            logger.debug("Detected language: %s", detected_language)
+            self.language = detected_language
         self.cache_result(self._cache, self._transcription, "transcription")
 
     def pitch_vocals(self, file_path: str = None):
