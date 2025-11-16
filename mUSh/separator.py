@@ -1,6 +1,7 @@
-import demucs.separate
 import os
 from pathlib import Path
+
+import demucs.separate
 import ffmpeg
 
 REUSE_OK = True

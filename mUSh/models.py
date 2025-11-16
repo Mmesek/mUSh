@@ -7,6 +7,7 @@ Following models has been created based on format specified at https://usdx.eu/f
 """
 
 from enum import Enum
+
 import msgspec
 
 

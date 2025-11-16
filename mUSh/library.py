@@ -1,7 +1,8 @@
 import os
-import msgspec
-from song import Song
 from pathlib import Path
+
+import msgspec
+from mUSh.song import Song
 
 
 class LibrarySong(msgspec.Struct):

@@ -1,12 +1,13 @@
 import argparse
 
-from cli import logger
-from song import Song
+from mUSh.cli import logger
+from mUSh.song import Song
+
 
 parser = argparse.ArgumentParser()
-parser.add_argument("filepath", help="Path to file to process")
+parser.add_argument("-filepath", help="Path to file to process")
 parser.add_argument(
-    "output",
+    "-output",
     help="Path to cache directory where output will be stored. Default is `out`",
     default="out",
 )

@@ -1,16 +1,16 @@
 import json
 import os
 from pathlib import Path
+import shutil
 
 import msgspec
-import pitcher
-import separator
-import transcriber
-from bpm import analyze_bpm
-from cli import logger
-from merge import NoteCollection, get_multiplier
-from models import Note, NoteTypes
-from models import Song as SongSchema
+from mUSh import pitcher
+from mUSh import separator
+from mUSh import transcriber
+from mUSh import bpm
+from mUSh import audio_notes
+from mUSh.cli import logger
+from mUSh.models import Note, NoteTypes, Song as SongSchema
 
 OUTPUT_DIR = "out"
 HTDEMUCS_MODEL = "htdemucs_ft"
@@ -83,7 +83,6 @@ class FileOperations(SongSchema):
 
     def cache_result(self, path: str, data, key: str):
         logger.debug("Caching result %s to %s", key, path)
-        import json
 
         os.makedirs(path / "cache", exist_ok=True)
 
@@ -114,8 +113,6 @@ class FileOperations(SongSchema):
         return file
 
     def _move(self, src: str, dst: str, file: str):
-        import shutil
-
         destination = dst + "/" + file
         logger.debug("Moving %s to %s", src, destination)
         shutil.move(src, destination)
@@ -208,8 +205,8 @@ class Song(FileOperations):
             return
 
         logger.info("Analyzing BPM from %s", self.audio)
-        self._real_bpm = analyze_bpm(self.get_path(self.audio))
-        self.bpm = self._real_bpm / 4 * get_multiplier(self._real_bpm / 4)
+        self._real_bpm = bpm.analyze_bpm(self.get_path(self.audio))
+        self.bpm = self._real_bpm / 4 * bpm.get_multiplier(self._real_bpm / 4)
         self.cache_result(
             self._cache,
             {"bpm": float(self.bpm), "real_bpm": float(self._real_bpm)},
@@ -229,7 +226,7 @@ class Song(FileOperations):
             self.pitch_vocals()
 
         logger.info("Building notes from transcription and pitch")
-        notes = NoteCollection(self._transcription, self._pitch_result)
+        notes = audio_notes.NoteCollection(self._transcription, self._pitch_result)
         if not self.gap:
             gap = notes.result["start"][1]
             logger.debug("Setting notes gap to %s", gap)

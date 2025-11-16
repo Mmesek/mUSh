@@ -1,8 +1,9 @@
-import msgspec
-import pandas as pd
-import numpy as np
 import string
-from bpm import get_multiplier
+
+import msgspec
+import numpy as np
+import pandas as pd
+from mUSh.bpm import get_multiplier
 
 
 def match_frequency_to_char(interval_list, freq_dict):

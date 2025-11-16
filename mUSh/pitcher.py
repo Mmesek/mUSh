@@ -1,9 +1,8 @@
-import msgspec
 import crepe
-from scipy.io import wavfile
+import msgspec
 import numpy as np
-
-from separator import convert
+from mUSh.separator import convert
+from scipy.io import wavfile
 
 
 class Pitch(msgspec.Struct):
