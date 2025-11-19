@@ -3,6 +3,7 @@ from pathlib import Path
 
 import msgspec
 from mUSh.song import Song
+from mUSh.cli import logger
 
 
 class LibrarySong(msgspec.Struct):
@@ -32,4 +33,15 @@ def get_songs(path: str) -> list[LibrarySong]:
 
 def list_library(path: str):
     for element in get_songs(path):
-        print(element.playlist, element.song.title)
+        logger.info(element.playlist, element.song.title)
+
+
+def add_missing_stems(path: str):
+    for element in get_songs(path):
+        if element.song.instrumental:
+            logger.info("Instrumental stems already exists in %s", element.song.title)
+            continue
+        logger.info("Adding stems to %s", element.song.title)
+        element.song.separate_vocals()
+        element.song.write(element.folder)
+        element.song.move(element.folder)
