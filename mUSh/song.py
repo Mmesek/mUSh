@@ -14,6 +14,7 @@ from mUSh.models import Note, NoteTypes, Song as SongSchema
 
 OUTPUT_DIR = "out"
 HTDEMUCS_MODEL = "htdemucs_ft"
+DRY_RUN = False
 
 
 class FileOperations(SongSchema):
@@ -26,10 +27,10 @@ class FileOperations(SongSchema):
         if not text.startswith("#"):
             raise TypeError("Not a valid .txt file")
         for line in text.splitlines():
-            line = line.strip()
             if line == "E":
                 continue
             elif line.startswith("#"):
+                line = line.strip()
                 key, value = line.split(":", 1)
                 if value[0].isdigit():
                     value = value.replace(",", ".")
@@ -44,7 +45,10 @@ class FileOperations(SongSchema):
     def read(cls, path: str) -> "Song":
         logger.info("Reading %s", path)
         with open(path, "r", encoding="utf-8", errors="ignore") as file:
-            return cls.parse(file.read())
+            r = cls.parse(file.read())
+            if r._path == Path("."):
+                r._path = Path(path).parent  # / Path(path).name.split(".")[0]
+            return r
 
     def dump(self) -> str:
         """Dumps structure into a text form"""
@@ -72,14 +76,18 @@ class FileOperations(SongSchema):
     def write(self, path: str, text: str = None):
         if not text:
             text = self.dump()
-        logger.debug("Writing song `%s` data to %s", self.title, path)
+        dest = Path(path) / (self.artist + " - " + self.title + ".txt").replace(
+            os.path.sep, " "
+        )
+        logger.debug("Writing song `%s` data to %s", self.title, dest)
         with open(
-            path + "/" + self.artist + " - " + self.title + ".txt",
+            dest,
             "w",
             newline="",
             encoding="utf-8",
         ) as file:
-            file.writelines(text)
+            if not DRY_RUN:
+                file.writelines(text)
 
     def cache_result(self, path: str, data, key: str):
         logger.debug("Caching result %s to %s", key, path)
@@ -115,15 +123,17 @@ class FileOperations(SongSchema):
     def _move(self, src: str, dst: str, file: str):
         destination = dst + "/" + file
         logger.debug("Moving %s to %s", src, destination)
-        shutil.move(src, destination)
+        if not DRY_RUN:
+            shutil.move(src, destination)
 
     def move(self, destination: str):
-        destination += "/" + self.artist + " - " + self.title
+        destination = str(destination)  # + "/" + self.artist + " - " + self.title
         logger.debug("Creating directory %s", destination)
         os.makedirs(destination, exist_ok=True)
 
         self._move(self.get_path(self.audio), destination, self.audio)
-        if self.audio != self.video and self.video:
+        if self.audio != self.video and self.video and "=" not in self.video:
+            # Absolutely not perfect way to check if it's a path
             self._move(self.get_path(self.video), destination, self.video)
 
         self._move(self.get_cache(self.vocals), destination, self.vocals)
@@ -140,7 +150,7 @@ class Song(FileOperations):
     def __post_init__(self):
         super().__post_init__()
         if not self._path:
-            self._path = str(Path(self.audio).parent)
+            self._path = Path(self.audio).parent
         self._cache = (
             Path(OUTPUT_DIR)
             / HTDEMUCS_MODEL
@@ -154,7 +164,9 @@ class Song(FileOperations):
             return
 
         logger.info("Separating vocals from %s", self.audio)
-        output_dir = separator.separate(self.get_path(self.audio))
+        # os.path.splitext(Path(path).name)[0]
+        path = self.get_path(self.audio) if not file_path else file_path
+        output_dir = separator.separate(path)
         self.vocals = separator.convert(output_dir, "vocals.mp3")
         self.instrumental = separator.convert(output_dir, "no_vocals.mp3")
 
