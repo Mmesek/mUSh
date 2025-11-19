@@ -26,7 +26,8 @@ def get_songs(path: str) -> list[LibrarySong]:
         playlist = folder.parent
         try:
             songs.append(LibrarySong(folder, playlist.name, Song.read(song_path)))
-        except TypeError:
+        except (TypeError, msgspec.ValidationError, IndexError) as ex:
+            logger.error("Couldn't read %s due to %s", song_path, ex)
             continue
     return songs
 
@@ -42,6 +43,10 @@ def add_missing_stems(path: str):
             logger.info("Instrumental stems already exists in %s", element.song.title)
             continue
         logger.info("Adding stems to %s", element.song.title)
-        element.song.separate_vocals()
-        element.song.write(element.folder)
-        element.song.move(element.folder)
+        try:
+            element.song.separate_vocals()
+            element.song.write(element.song.get_path(""))
+            element.song.move(element.folder)
+        except Exception as ex:
+            logger.warning("Couldn't save %s due to %s", element.song.title, ex)
+
