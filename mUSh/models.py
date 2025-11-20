@@ -36,7 +36,6 @@ class Note(msgspec.Struct):
 
 
 class Song(msgspec.Struct):
-    mp3: str = None  # deprecated
     title: str = None
     artist: str = None
     notes: list[Note] = None
@@ -66,13 +65,23 @@ class Song(msgspec.Struct):
     p2: str | None = None
     providedby: str | None = None
     comment: str | None = None
+    # Deprecated
+    mp3: str = None
+    duetsingerp1: str | None = None
+    duetsingerp2: str | None = None
+    resolution: str | None = None
+    notesgap: str | None = None
+    relative: str | None = None
+    encoding: str | None = None
+    author: str | None = None
+    fixer: str | None = None
+    album: str | None = None
+    source: str | None = None
+    youtube: str | None = None
+    length: str | None = None
 
     def __post_init__(self):
-        if self.audio:
-            self.mp3 = self.audio
-        else:
-            self.audio = self.mp3
-
+        self._handle_deprecated_fields()
         if any(self.audio.endswith(x) for x in {"mp4", "avi", "webm"}):
             self.video = self.audio
 
@@ -80,3 +89,16 @@ class Song(msgspec.Struct):
             audio = Path(self.audio).name
             a, t = audio.split(".")[0].split(" - ")
             self.artist, self.title = a.strip(), t.strip()
+
+    def _handle_deprecated_fields(self):
+        if self.mp3 and not self.audio:
+            self.audio = self.mp3
+
+        if self.duetsingerp1 and not self.p1:
+            self.p1 = self.duetsingerp1
+
+        if self.duetsingerp2 and not self.p2:
+            self.p2 = self.duetsingerp2
+
+        if self.author and not self.creator:
+            self.creator = self.author
