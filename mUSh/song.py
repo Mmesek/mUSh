@@ -32,11 +32,13 @@ class FileOperations(SongSchema):
             elif line.startswith("#"):
                 line = line.strip()
                 key, value = line.split(":", 1)
-                if value[0].isdigit():
+                if value[0].isdigit() or len(value) > 1 and value[1].isdigit():
                     value = value.replace(",", ".")
                 data[key.strip("#").lower()] = value
             else:
-                note = dict(zip(Note.__annotations__, line.split(" ", 4)))
+                note = dict(
+                    zip(Note.__annotations__, [i for i in line.split(" ", 4) if i])
+                )
                 data["notes"].append(msgspec.convert(note, Note, strict=False))
 
         return msgspec.convert(data, cls, strict=False)
@@ -44,7 +46,7 @@ class FileOperations(SongSchema):
     @classmethod
     def read(cls, path: str) -> "Song":
         logger.info("Reading %s", path)
-        with open(path, "r", encoding="utf-8", errors="ignore") as file:
+        with open(path, "r", encoding="utf-8-sig", errors="ignore") as file:
             r = cls.parse(file.read())
             if r._path == Path("."):
                 r._path = Path(path).parent  # / Path(path).name.split(".")[0]
