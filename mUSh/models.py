@@ -30,8 +30,10 @@ class Note(msgspec.Struct):
     text: str | None = None
 
     def __str__(self):
-        if self.length:
+        if self.pitch:
             return f"{self.note_type.value} {self.start_beat:.0f} {self.length:.0f} {self.pitch:.0f} {self.text}"
+        elif self.length:
+            return f"{self.note_type.value} {self.start_beat:.0f} {self.length:.0f}"
         return f"{self.note_type.value} {self.start_beat:.0f}"
 
 
