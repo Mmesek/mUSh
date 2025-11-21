@@ -32,7 +32,12 @@ class FileOperations(SongSchema):
             elif line.startswith("#"):
                 line = line.strip()
                 key, value = line.split(":", 1)
-                if value[0].isdigit() or len(value) > 1 and value[1].isdigit():
+                if (
+                    value
+                    and value[0].isdigit()
+                    or len(value) > 1
+                    and value[1].isdigit()
+                ):
                     value = value.replace(",", ".")
                 data[key.strip("#").lower()] = value
             else:
