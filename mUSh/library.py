@@ -22,11 +22,13 @@ def iterate_songs(path: str):
 def get_songs(path: str) -> list[LibrarySong]:
     songs = []
     for song_path in iterate_songs(path):
+        if song_path.endswith("license.txt"):
+            continue
         folder = Path(song_path).parent
         playlist = folder.parent
         try:
             songs.append(LibrarySong(folder, playlist.name, Song.read(song_path)))
-        except (TypeError, msgspec.ValidationError, IndexError) as ex:
+        except (TypeError, msgspec.ValidationError) as ex:
             logger.error("Couldn't read %s due to %s", song_path, ex)
             continue
     return songs
