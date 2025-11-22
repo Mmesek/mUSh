@@ -17,11 +17,9 @@ parser.add_argument(
     default="mUSh",
 )
 
-if __name__ == "__main__":
-    args = parser.parse_args()
-    logger.info("New instance started")
-    path = Path(args.filepath)
-    s = Song(path.name, _path=path.absolute().resolve().parent)
+
+def process_file(path):
+    s = Song(audio=path.name, _path=path.absolute().resolve().parent)
     logger.info("Song `%s` by `%s` initiated", s.title, s.artist)
     s.build_notes()
     logger.info("Notes built")
@@ -29,3 +27,20 @@ if __name__ == "__main__":
     logger.info("Moved to library")
     s.write(destination)
     logger.info("Written result to %s", args.output)
+
+
+if __name__ == "__main__":
+    args = parser.parse_args()
+    logger.info("New instance started")
+    path = Path(args.filepath)
+    if path.is_dir():
+        paths = path.walk()
+    else:
+        paths = [[None], [None], [path]]
+    for parent, dirs, files in paths:
+        for file in files:
+            path = parent / file
+            try:
+                process_file(path)
+            except ValueError:
+                continue
