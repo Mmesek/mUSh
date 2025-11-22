@@ -134,7 +134,9 @@ class FileOperations(SongSchema):
             shutil.move(src, destination)
 
     def move(self, destination: str):
-        destination = str(destination)  # + "/" + self.artist + " - " + self.title
+        destination = str(destination)
+        if self.artist not in destination:
+            destination += "/" + self.artist + " - " + self.title
         logger.debug("Creating directory %s", destination)
         os.makedirs(destination, exist_ok=True)
 
@@ -143,8 +145,12 @@ class FileOperations(SongSchema):
             # Absolutely not perfect way to check if it's a path
             self._move(self.get_path(self.video), destination, self.video)
 
-        self._move(self.get_cache(self.vocals), destination, self.vocals)
-        self._move(self.get_cache(self.instrumental), destination, self.instrumental)
+        if self.vocals:
+            self._move(self.get_cache(self.vocals), destination, self.vocals)
+        if self.instrumental:
+            self._move(
+                self.get_cache(self.instrumental), destination, self.instrumental
+            )
         return destination
 
 
