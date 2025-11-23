@@ -36,7 +36,7 @@ if __name__ == "__main__":
     if path.is_dir():
         paths = path.walk()
     else:
-        paths = [[None], [None], [path]]
+        paths = [["", "", [path]]]
     for parent, dirs, files in paths:
         for file in files:
             path = parent / file
