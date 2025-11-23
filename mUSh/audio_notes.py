@@ -109,13 +109,13 @@ class NoteCollection(msgspec.Struct):
                 sentence = ""
                 _add = True
             sentence += char
-            if char[-1] in punc_breaks:
+            if not _add and char[-1] in punc_breaks:
                 running.append(sentence)
                 sentence = ""
                 _add = True
             if not _add:
                 running.append(sentence)
-        self.result["running"] = running
+        self.result["running"] = running[: len(self.result)]
         self.result["previous_running"] = self.result["running"].shift(1)
         self.result["finished_sentence"] = self.result.apply(
             lambda x: x["running"] == x["previous_running"], axis=1
@@ -221,7 +221,7 @@ class NoteCollection(msgspec.Struct):
                 continue
             prev = merged[-1]
             prev_char = str(prev["char"])
-            print(prev_char, "+", row["char"])
+            # print(prev_char, "+", row["char"])
             prev["char"] = prev_char + str(row["char"])
 
             # new duration: max end - prev start
