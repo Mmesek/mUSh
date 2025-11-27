@@ -2,8 +2,10 @@ import os
 from pathlib import Path
 
 import msgspec
-from mUSh.song import Song
+
 from mUSh.cli import logger
+from mUSh.cover import fetch_cover
+from mUSh.song import Song
 
 
 class LibrarySong(msgspec.Struct):
@@ -51,4 +53,20 @@ def add_missing_stems(path: str):
             element.song.move(element.folder)
         except Exception as ex:
             logger.warning("Couldn't save %s due to %s", element.song.title, ex)
+
+
+def add_missing_covers(path: str):
+    for element in get_songs(path):
+        if element.song.cover:
+            logger.info("Cover already exists in %s", element.song.title)
+            continue
+        if out := fetch_cover(
+            element.song.artist, element.song.title, element.song.get_path("")
+        ):
+            logger.info("Adding cover to %s", element.song.title)
+            element.song.cover = out.name
+            element.song.write(element.song.get_path(""))
+        else:
+            logger.info("Couldn't add cover to %s", element.song.title)
+
 
