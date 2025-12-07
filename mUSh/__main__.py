@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 from mUSh.cli import logger
 from mUSh.song import Song
+from mUSh.library import add_cover
 
 
 parser = argparse.ArgumentParser()
@@ -22,6 +23,7 @@ def process_file(path):
     s = Song(audio=path.name, _path=path.absolute().resolve().parent)
     logger.info("Song `%s` by `%s` initiated", s.title, s.artist)
     s.build_notes()
+    add_cover(s)
     logger.info("Notes built")
     destination = s.move(args.library)
     logger.info("Moved to library")

@@ -60,13 +60,16 @@ def add_missing_covers(path: str):
         if element.song.cover:
             logger.info("Cover already exists in %s", element.song.title)
             continue
-        if out := fetch_cover(
-            element.song.artist, element.song.title, element.song.get_path("")
-        ):
-            logger.info("Adding cover to %s", element.song.title)
-            element.song.cover = out.name
+        if add_cover(element.song):
             element.song.write(element.song.get_path(""))
-        else:
-            logger.info("Couldn't add cover to %s", element.song.title)
+
+
+def add_cover(song: Song):
+    if out := fetch_cover(song.artist, song.title, song.get_path("")):
+        logger.info("Adding cover to %s", song.title)
+        song.cover = out.name
+        return True
+    else:
+        logger.info("Couldn't add cover to %s", song.title)
 
 
